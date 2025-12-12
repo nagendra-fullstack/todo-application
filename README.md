@@ -30,7 +30,8 @@ This project demonstrates strong understanding of DOM manipulation, event handli
 
 1. Clone the repository or download the ZIP file  
 ```
-git clone <your-repo-link>
+git clone https://github.com/nagendra-programmer/todo-application.git
+
 ```
 
 2. Open the project folder  
