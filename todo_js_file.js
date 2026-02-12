@@ -1,84 +1,97 @@
 let todoItemsContainer = document.getElementById("todoItemsContainer");
 let addTodoButton = document.getElementById("addTodoButton");
-let saveButton=document.getElementById('saveButton');
+let saveTodoButton = document.getElementById("saveTodoButton");
 
-//localStorage.removeItem('todoList');
-
-
-saveButton.onclick=function(){
-  localStorage.setItem('todoList',JSON.stringify(todoList));
-}
-
-function getTodoList(){
-  let stringifiedTodoList=localStorage.getItem('todoList');
-  let parsedTodoList=JSON.parse(stringifiedTodoList);
-
-  if (parsedTodoList===null){
+function getTodoListFromLocalStorage() {
+  let stringifiedTodoList = localStorage.getItem("todoList");
+  let parsedTodoList = JSON.parse(stringifiedTodoList);
+  if (parsedTodoList === null) {
     return [];
-  }
-  else{
+  } else {
     return parsedTodoList;
   }
 }
 
-let todoList=getTodoList();
 
-
+let todoList = getTodoListFromLocalStorage();
 let todosCount = todoList.length;
 
-function onTodoStatusChange(checkboxId, labelId,todoId) {
-  let labelElement = document.getElementById(labelId);
-  labelElement.classList.toggle('checked');
+saveTodoButton.onclick = function() {
+  localStorage.setItem("todoList", JSON.stringify(todoList));
+};
 
-  let todoItemIndex=todoList.findIndex(function(eachItem){
-    let eachItemId='todo'+eachItem.uniqueNo;
-    if (todoId===eachItemId){
+//adding a new todo  
+function onAddTodo() {
+  let userInputElement = document.getElementById("todoUserInput");
+  let userInputValue = userInputElement.value;
+
+  if (userInputValue === "") { 
+    alert("Enter Valid Text");
+    return;
+  }
+
+  let newTodo = {
+    text: userInputValue,
+    uniqueNo: Date.now(),
+    isChecked: false
+  };
+  todoList.push(newTodo);
+  createAndAppendTodo(newTodo);
+  userInputElement.value = "";
+}
+
+addTodoButton.onclick = function() {
+  onAddTodo();
+};
+
+//changing the todo status 
+function onTodoStatusChange(labelId, todoId) {
+
+  let labelElement = document.getElementById(labelId);
+  labelElement.classList.toggle("checked");
+
+  let todoObjectIndex = todoList.findIndex(function(eachTodo) {
+    let eachTodoId = "todo" + eachTodo.uniqueNo;
+
+    if (eachTodoId === todoId) {
       return true;
-    }
-    else{
+    } else {
       return false;
     }
   });
-  let todoObj=todoList[todoItemIndex];
-  if (todoObj.isChecked===true){
-    todoObj.isChecked=false;
+
+  let todoObject = todoList[todoObjectIndex];
+
+  if(todoObject.isChecked === true){
+    todoObject.isChecked = false;
+  } else {
+    todoObject.isChecked = true;
   }
-  else{
-    todoObj.isChecked=true;
-  }
-  
-  // let checkboxElement = document.getElementById(checkboxId);
-  // if(checkboxElement.checked===true){
-  //   labelElement.classList.add('checked');
-  // }
-  // else{
-  //   labelElement.classList.remove('checked');
-  // }
 
 }
 
+//deleting the todo 
 function onDeleteTodo(todoId) {
   let todoElement = document.getElementById(todoId);
   todoItemsContainer.removeChild(todoElement);
 
-  let deletedTodoItemIndex=todoList.findIndex(function(eachItem){
-    let eachItemId='todo'+eachItem.uniqueNo;
-    if(eachItemId===todoId){
+  let deleteElementIndex = todoList.findIndex(function(eachTodo) {
+    let eachTodoId = "todo" + eachTodo.uniqueNo;
+    if (eachTodoId === todoId) {
       return true;
-    }
-    else{
+    } else {
       return false;
     }
+  });
 
-  })
-  todoList.splice(deletedTodoItemIndex,1);
-  
+  todoList.splice(deleteElementIndex, 1);
 }
 
+//Dynamic dom creation  
 function createAndAppendTodo(todo) {
-  let todoId = 'todo' + todo.uniqueNo;
-  let checkboxId = 'checkbox' + todo.uniqueNo;
-  let labelId = 'label' + todo.uniqueNo;
+  let todoId = "todo" + todo.uniqueNo;
+  let checkboxId = "checkbox" + todo.uniqueNo;
+  let labelId = "label" + todo.uniqueNo;
 
   let todoElement = document.createElement("li");
   todoElement.classList.add("todo-item-container", "d-flex", "flex-row");
@@ -88,14 +101,15 @@ function createAndAppendTodo(todo) {
   let inputElement = document.createElement("input");
   inputElement.type = "checkbox";
   inputElement.id = checkboxId;
-  inputElement.checked=todo.isChecked;
+  inputElement.checked = todo.isChecked;
 
-  inputElement.onclick = function() {
-    onTodoStatusChange(checkboxId, labelId,todoId);
-  }
+  inputElement.onclick = function () {
+    onTodoStatusChange(labelId, todoId);
+  };
 
   inputElement.classList.add("checkbox-input");
   todoElement.appendChild(inputElement);
+  
 
   let labelContainer = document.createElement("div");
   labelContainer.classList.add("label-container", "d-flex", "flex-row");
@@ -106,9 +120,8 @@ function createAndAppendTodo(todo) {
   labelElement.id = labelId;
   labelElement.classList.add("checkbox-label");
   labelElement.textContent = todo.text;
-
-  if(todo.isChecked===true){
-    labelElement.classList.add('checked')
+  if (todo.isChecked === true) {
+    labelElement.classList.add("checked");
   }
   labelContainer.appendChild(labelElement);
 
@@ -128,31 +141,4 @@ function createAndAppendTodo(todo) {
 
 for (let todo of todoList) {
   createAndAppendTodo(todo);
-}
-
-function onAddTodo() {
-  let userInputElement = document.getElementById("todoUserInput");
-  let userInputValue = userInputElement.value;
-
-  if(userInputValue === ""){
-    alert("Enter Valid Text");
-    return;
-  }
-
-  todosCount = todosCount + 1;
-
-  let newTodo = {
-    text: userInputValue,
-    uniqueNo: todosCount,
-    isChecked:false
-  };
-  
-  todoList.push(newTodo);
-
-  createAndAppendTodo(newTodo);
-  userInputElement.value = "";
-}
-
-addTodoButton.onclick = function(){
-  onAddTodo();
 }
